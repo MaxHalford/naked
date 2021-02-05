@@ -62,7 +62,7 @@ model.fit(docs, is_positive)
 naked.strip(model)
 ```
 
-```py
+```
 def tfidf_vectorizer(x):
 
     norm = 'l2'
