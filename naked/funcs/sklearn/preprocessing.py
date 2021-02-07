@@ -7,3 +7,15 @@ def normalizer(x, norm):
         norm_val = max(abs(xi) for xi in x)
 
     return [xi / norm_val for xi in x]
+
+
+def standard_scaler(x, mean_, var_, with_mean, with_std):
+
+    def scale(x, m, v):
+        if with_mean:
+            x -= m
+        if with_std:
+            x /= v ** .5
+        return x
+
+    return [scale(xi, m, v) for xi, m, v in zip(x, mean_, var_)]
