@@ -61,9 +61,13 @@ model.fit(docs, is_positive)
 print(naked.strip(model))
 ```
 
+<<<<<<< HEAD
 This produces the following output.
 
 ```py
+=======
+```
+>>>>>>> main
 def tfidf_vectorizer(x):
 
     lowercase = True
