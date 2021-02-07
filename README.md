@@ -169,6 +169,10 @@ sklearn
 ### Will this work for all library versions?
 
 Not by design. A release of `naked` is intended to support a library above a particular version. If we notice that `naked` doesn't work for a newer version of a given library, then a new version of `naked` should be released to handle said library version. You may refer to the [`pyproject.toml`](pyproject.toml) file to view library support.
+
+### How can I trust this is correct?
+
+This package is really easy to unit test. One simply has to compare the outputs of the model with its "naked" version and check that the outputs are identical. Check out the [`test_naked.py`](naked/test_naked.py) file if you're curious.
 ## Development workflow
 
 ```sh
