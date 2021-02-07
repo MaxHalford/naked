@@ -166,7 +166,7 @@ sklearn
 
 ```
 
-### Will this work for any version of <insert library name>?
+### Will this work for all library versions?
 
 Not by design. A release of `naked` is intended to support a library above a particular version. If we notice that `naked` doesn't work for a newer version of a given library, then a new version of `naked` should be released to handle said library version. You may refer to the [`pyproject.toml`](pyproject.toml) file to view library support.
 ## Development workflow
