@@ -63,10 +63,28 @@ AVAILABLE = '\n'.join(
     for mod in mapping
 )
 
-def strip(model):
 
-    if isinstance(model, Pipeline):
-        return FuncPipeline([strip(step) for _, step in model.steps])
+def handle_input_names(x):
+    return [x[name] for name in names]
+
+
+def make_handle_input_names(names: str) -> Func:
+    code = inspect.getsource(handle_input_names)
+    loc = code.splitlines()
+    return Func('handle_input_names', loc[0] + f'\n    names = {names}\n' + loc[1])
+
+
+def handle_output_names(x):
+    return dict(zip(names, x))
+
+
+def make_handle_output_names(names: str) -> Func:
+    code = inspect.getsource(handle_output_names)
+    loc = code.splitlines()
+    return Func('handle_output_names', loc[0] + f'\n    names = {names}\n' + loc[1])
+
+
+def _strip(model):
 
     # Check if the model is supported
     mod = model.__class__.__module__.split('.')[0]
@@ -101,3 +119,31 @@ def strip(model):
     code = loc[0] + '\n\n' + params_code + '\n' + '\n'.join(loc[1:])
 
     return Func(func.__name__, code)
+
+
+def strip(model, input_names=None, output_names=None):
+
+    if isinstance(model, Pipeline):
+        func = FuncPipeline([_strip(step) for _, step in model.steps])
+    else:
+        func = _strip(model)
+
+    # If input names are specified, then we'll assume that the input x is a dictionary and not a
+    # list. We'll be able to handle by first mapping the dictionary values to a list in the
+    # specified order.
+    if input_names is not None:
+        handle_input_names = make_handle_input_names(input_names)
+        if isinstance(func, FuncPipeline):
+            func.funcs.insert(0, handle_input_names)
+        else:
+            func = FuncPipeline([handle_input_names, func])
+
+    # If output names are specified, then we'll produce a dictionary instead of a list.
+    if output_names is not None:
+        handle_output_names = make_handle_output_names(output_names)
+        if isinstance(func, FuncPipeline):
+            func.funcs.append(handle_output_names)
+        else:
+            func = FuncPipeline([func, handle_output_names])
+
+    return func

@@ -1,8 +1,21 @@
-# naked
+<h1>naked</h1>
 
-`naked` allows you to strip a model and only keep what matters for making predictions. The result is a pure Python function with no third-party dependencies that you can simply copy/paste wherever you wish.
+`naked` is a Python tool which allows you to strip a model and only keep what matters for making predictions. The result is a pure Python function with no third-party dependencies that you can simply copy/paste wherever you wish.
 
 This is simpler than deploying an API endpoint or loading a serialized model. The jury is still out on whether this is sane or not.
+- [Installation](#installation)
+- [Examples](#examples)
+  - [`sklearn.linear_model.LinearRegression`](#sklearnlinear_modellinearregression)
+  - [`sklearn.pipeline.Pipeline`](#sklearnpipelinepipeline)
+- [FAQ](#faq)
+  - [What models are supported?](#what-models-are-supported)
+  - [Will this work for all library versions?](#will-this-work-for-all-library-versions)
+  - [How can I trust this is correct?](#how-can-i-trust-this-is-correct)
+  - [How should I handle feature names?](#how-should-i-handle-feature-names)
+- [What about output names?](#what-about-output-names)
+- [Development workflow](#development-workflow)
+- [Things to do](#things-to-do)
+- [License](#license)
 
 ## Installation
 
@@ -173,6 +186,173 @@ Not by design. A release of `naked` is intended to support a library above a par
 ### How can I trust this is correct?
 
 This package is really easy to unit test. One simply has to compare the outputs of the model with its "naked" version and check that the outputs are identical. Check out the [`test_naked.py`](naked/test_naked.py) file if you're curious.
+
+### How should I handle feature names?
+
+Let's take the example of a multi-class logistic regression trained on the wine dataset.
+
+```py
+from sklearn import datasets
+from sklearn import linear_model
+from sklearn import pipeline
+from sklearn import preprocessing
+
+dataset = datasets.load_wine()
+X = dataset.data
+y = dataset.target
+model = pipeline.make_pipeline(
+    preprocessing.StandardScaler(),
+    linear_model.LogisticRegression()
+)
+model.fit(X, y)
+```
+
+By default, the `strip` function produces a function that takes as input a list of feature values. Instead, let's say we want to evaluate the function on a dictionary of features, thus associating each feature value with a name.
+
+```py
+x = dict(zip(dataset.feature_names, X[0]))
+print(x)
+```
+
+```py
+{'alcohol': 14.23,
+ 'malic_acid': 1.71,
+ 'ash': 2.43,
+ 'alcalinity_of_ash': 15.6,
+ 'magnesium': 127.0,
+ 'total_phenols': 2.8,
+ 'flavanoids': 3.06,
+ 'nonflavanoid_phenols': 0.28,
+ 'proanthocyanins': 2.29,
+ 'color_intensity': 5.64,
+ 'hue': 1.04,
+ 'od280/od315_of_diluted_wines': 3.92,
+ 'proline': 1065.0}
+```
+
+Passing the feature names to the `strip` function will add a function that maps the features to a list.
+
+```py
+naked.strip(model, input_names=dataset.feature_names)
+```
+
+```py
+def handle_input_names(x):
+    names = ['alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium', 'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins', 'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline']
+    return [x[name] for name in names]
+
+def standard_scaler(x):
+
+    mean_ = [13.000617977528083, 2.336348314606741, 2.3665168539325854, 19.49494382022472, 99.74157303370787, 2.295112359550562, 2.0292696629213474, 0.36185393258426973, 1.5908988764044953, 5.058089882022473, 0.9574494382022468, 2.6116853932584254, 746.8932584269663]
+    var_ = [0.6553597304633259, 1.241004080924126, 0.07484180027774268, 11.090030614821362, 202.84332786264366, 0.3894890323191514, 0.9921135115515715, 0.015401619113748266, 0.32575424820098453, 5.344255847629093, 0.05195144969069561, 0.5012544628203511, 98609.60096578706]
+    with_mean = True
+    with_std = True
+
+    def scale(x, m, v):
+        if with_mean:
+            x -= m
+        if with_std:
+            x /= v ** .5
+        return x
+
+    return [scale(xi, m, v) for xi, m, v in zip(x, mean_, var_)]
+
+def logistic_regression(x):
+
+    coef_ = [[0.8101347947338147, 0.20382073148760085, 0.47221241678911957, -0.8447843882542064, 0.04952904623674445, 0.21372479616642068, 0.6478750705319883, -0.19982499112990385, 0.13833867563545404, 0.17160966151451867, 0.13090887117218597, 0.7259506896985365, 1.07895948707047], [-1.0103233753629153, -0.44045952703036084, -0.8480739967718842, 0.5835732316278703, -0.09770602368275362, 0.027527982220605866, 0.35399157401383297, 0.21278279386396404, 0.2633610495737497, -1.0412707677956505, 0.6825215991118386, 0.05287634940648419, -1.1407929345327175], [0.20018858062910203, 0.23663879554275832, 0.37586157998276365, 0.26121115662633365, 0.048176977446007865, -0.2412527783870254, -1.0018666445458222, -0.012957802734061021, -0.40169972520920566, 0.8696611062811332, -0.8134304702840255, -0.7788270391050198, 0.061833447462247046]]
+    intercept_ = [0.41229358315867787, 0.7048164121833935, -1.1171099953420585]
+
+    import math
+
+    logits = [
+        b + sum(xi * wi for xi, wi in zip(x, w))
+        for w, b in zip(coef_, intercept_)
+    ]
+
+    # Sigmoid activation for binary classification
+    if len(logits) == 1:
+        p_true = 1 / (1 + math.exp(-logits[0]))
+        return [1 - p_true, p_true]
+
+    # Softmax activation for multi-class classification
+    z_max = max(logits)
+    exp = [math.exp(z - z_max) for z in logits]
+    exp_sum = sum(exp)
+    return [e / exp_sum for e in exp]
+
+def pipeline(x):
+    x = handle_input_names(x)
+    x = standard_scaler(x)
+    x = logistic_regression(x)
+    return x
+```
+
+## What about output names?
+
+You can also specify the `output_names` parameter to associate each output value with a name. Of course, this doesn't work for cases where a single value is produced, such as single-target regression.
+
+
+```py
+naked.strip(model, input_names=dataset.feature_names, output_names=dataset.target_names)
+```
+
+```py
+def handle_input_names(x):
+    names = ['alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium', 'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins', 'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline']
+    return [x[name] for name in names]
+
+def standard_scaler(x):
+
+    mean_ = [13.000617977528083, 2.336348314606741, 2.3665168539325854, 19.49494382022472, 99.74157303370787, 2.295112359550562, 2.0292696629213474, 0.36185393258426973, 1.5908988764044953, 5.058089882022473, 0.9574494382022468, 2.6116853932584254, 746.8932584269663]
+    var_ = [0.6553597304633259, 1.241004080924126, 0.07484180027774268, 11.090030614821362, 202.84332786264366, 0.3894890323191514, 0.9921135115515715, 0.015401619113748266, 0.32575424820098453, 5.344255847629093, 0.05195144969069561, 0.5012544628203511, 98609.60096578706]
+    with_mean = True
+    with_std = True
+
+    def scale(x, m, v):
+        if with_mean:
+            x -= m
+        if with_std:
+            x /= v ** .5
+        return x
+
+    return [scale(xi, m, v) for xi, m, v in zip(x, mean_, var_)]
+
+def logistic_regression(x):
+
+    coef_ = [[0.8101347947338147, 0.20382073148760085, 0.47221241678911957, -0.8447843882542064, 0.04952904623674445, 0.21372479616642068, 0.6478750705319883, -0.19982499112990385, 0.13833867563545404, 0.17160966151451867, 0.13090887117218597, 0.7259506896985365, 1.07895948707047], [-1.0103233753629153, -0.44045952703036084, -0.8480739967718842, 0.5835732316278703, -0.09770602368275362, 0.027527982220605866, 0.35399157401383297, 0.21278279386396404, 0.2633610495737497, -1.0412707677956505, 0.6825215991118386, 0.05287634940648419, -1.1407929345327175], [0.20018858062910203, 0.23663879554275832, 0.37586157998276365, 0.26121115662633365, 0.048176977446007865, -0.2412527783870254, -1.0018666445458222, -0.012957802734061021, -0.40169972520920566, 0.8696611062811332, -0.8134304702840255, -0.7788270391050198, 0.061833447462247046]]
+    intercept_ = [0.41229358315867787, 0.7048164121833935, -1.1171099953420585]
+
+    import math
+
+    logits = [
+        b + sum(xi * wi for xi, wi in zip(x, w))
+        for w, b in zip(coef_, intercept_)
+    ]
+
+    # Sigmoid activation for binary classification
+    if len(logits) == 1:
+        p_true = 1 / (1 + math.exp(-logits[0]))
+        return [1 - p_true, p_true]
+
+    # Softmax activation for multi-class classification
+    z_max = max(logits)
+    exp = [math.exp(z - z_max) for z in logits]
+    exp_sum = sum(exp)
+    return [e / exp_sum for e in exp]
+
+def handle_output_names(x):
+    names = ['class_0' 'class_1' 'class_2']
+    return dict(zip(names, x))
+
+def pipeline(x):
+    x = handle_input_names(x)
+    x = standard_scaler(x)
+    x = logistic_regression(x)
+    x = handle_output_names(x)
+    return x
+```
+
+As you can see, by specifying `input_names` as well as `output_names`, we obtain a pipeline of functions which takes as input a dictionary and produces a dictionary.
 ## Development workflow
 
 ```sh
