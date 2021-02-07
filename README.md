@@ -3,6 +3,13 @@
 `naked` allows you to strip a model and only keep what matters for making predictions. The result is a pure Python function with no third-party dependencies that you can simply copy/paste wherever you wish.
 
 This is simpler than deploying an API endpoint or loading a serialized model. The jury is still out on whether this is sane or not.
+
+## Installation
+
+```sh
+pip install git+https://github.com/MaxHalford/naked
+```
+
 ## Examples
 
 ### `sklearn.linear_model.LinearRegression`
@@ -61,13 +68,9 @@ model.fit(docs, is_positive)
 print(naked.strip(model))
 ```
 
-<<<<<<< HEAD
 This produces the following output.
 
 ```py
-=======
-```
->>>>>>> main
 def tfidf_vectorizer(x):
 
     lowercase = True
