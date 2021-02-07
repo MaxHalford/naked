@@ -12,7 +12,7 @@ This is simpler than deploying an API endpoint or loading a serialized model. Th
   - [Will this work for all library versions?](#will-this-work-for-all-library-versions)
   - [How can I trust this is correct?](#how-can-i-trust-this-is-correct)
   - [How should I handle feature names?](#how-should-i-handle-feature-names)
-- [What about output names?](#what-about-output-names)
+  - [What about output names?](#what-about-output-names)
 - [Development workflow](#development-workflow)
 - [Things to do](#things-to-do)
 - [License](#license)
@@ -287,7 +287,7 @@ def pipeline(x):
     return x
 ```
 
-## What about output names?
+### What about output names?
 
 You can also specify the `output_names` parameter to associate each output value with a name. Of course, this doesn't work for cases where a single value is produced, such as single-target regression.
 
