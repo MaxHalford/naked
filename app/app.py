@@ -6,17 +6,25 @@ from naked import mapping
 import streamlit as st
 
 """
-# Convert a model to pure Python
+# Convert a machine learning estimator to pure Python code
 
-This is an interface to display a pure Python representation of a pickled model. It uses
-[`naked`](https://github.com/MaxHalford/naked) under the hood.
+This is a tool that renders a pure Python representation of a pickled estimator. The output is
+just a bunch of Python functions that don't require any dependencies whatsoever. This makes it
+really trivial to put a machine learning model into production: you just have to copy/paste the
+code into your application. The code generation is done with [`naked`](https://github.com/MaxHalford/naked).
 
-The following library versions are supported:
+The following estimators are supported:
 """
 
-for name in mapping:
+listing = ""
+
+for name, estimators in mapping.items():
     lib = importlib.import_module(name)
-    st.write(f'- {name} {lib.__version__}')
+    listing += f'* {name} {lib.__version__}\n'
+    for estimator in estimators:
+        listing += f'    * {estimator}\n'
+
+st.markdown(listing)
 
 uploaded_file = st.file_uploader("Choose a pickled model")
 
