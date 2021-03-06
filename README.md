@@ -364,6 +364,12 @@ poetry shell
 pytest
 ```
 
+You may test the web interface locally by running streamlit:
+
+```sh
+streamlit run app/app.py
+```
+
 ## Things to do
 
 - Implement more models. For instance it should quite straightforward to support LightGBM.

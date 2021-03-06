@@ -1,0 +1,21 @@
+name: App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.6.8
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: naked-app
+          heroku_email: maxhalford25@gmail.com
+          buildpack: heroku/python
+          appdir: app
+          healthcheck: https://naked-app.herokuapp.com/
+          delay: 10
