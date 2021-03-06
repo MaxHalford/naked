@@ -8,10 +8,11 @@ import streamlit as st
 """
 # Convert a machine learning estimator to pure Python code
 
-This is a tool that renders a pure Python representation of a pickled estimator. The output is
-just a bunch of Python functions that don't require any dependencies whatsoever. This makes it
-really trivial to put a machine learning model into production: you just have to copy/paste the
-code into your application. The code generation is done with [`naked`](https://github.com/MaxHalford/naked).
+This is a tool that renders a pure Python representation of a
+[pickled](https://docs.python.org/3/library/pickle.html) estimator. The output is just a bunch of
+Python functions that don't require any dependencies whatsoever. This makes it really trivial to
+put a machine learning model into production: you just have to copy/paste the code into your
+application. The code generation is done with [`naked`](https://github.com/MaxHalford/naked).
 
 The following estimators are supported:
 """

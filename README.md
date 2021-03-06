@@ -4,7 +4,7 @@
 
 This is simpler than deploying an API endpoint or loading a serialized model. The jury is still out on whether this is sane or not. Of course I'm not the first one to have done this, for instance see [sklearn-porter](https://github.com/nok/sklearn-porter).
 
-Note that there is a [web interface](https://naked-app.herokuapp.com/) where you can upload a [pickle](https://docs.python.org/3/library/pickle.html)d model to generate its pure Python equivalent.
+Note that you can use `naked` via this [web interface](https://naked-app.herokuapp.com/).
 
 - [Installation](#installation)
 - [Examples](#examples)
