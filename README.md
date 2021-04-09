@@ -375,7 +375,7 @@ streamlit run app/app.py
 ## Things to do
 
 - Implement more models. For instance it should quite straightforward to support LightGBM.
-- Remove useless branching conditions. Parameters are currently handled via `if` statements. Ideally it would be nice to remove the `if` statements and only keep the code that will actually run.
+- Remove useless branching conditions. Parameters are currently handled via `if` statements. Ideally it would be nice to remove the `if` statements and only keep the code that will actually run. This should be doable by using the `ast` module.
 ## License
 
 MIT
