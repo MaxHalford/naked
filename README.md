@@ -2,7 +2,7 @@
 
 `naked` is a Python tool which allows you to strip a model and only keep what matters for making predictions. The result is a pure Python function with no third-party dependencies that you can simply copy/paste wherever you wish.
 
-This is simpler than deploying an API endpoint or loading a serialized model. The jury is still out on whether this is sane or not. Of course I'm not the first one to have done this, for instance see [sklearn-porter](https://github.com/nok/sklearn-porter) and [pure-predict](https://github.com/Ibotta/pure-predict). Note if you don't mind installing depencencies on your inference machine, then tools such as [scikit-learn-intelex](https://github.com/intel/scikit-learn-intelex) might do the job for you.
+This is simpler than deploying an API endpoint or loading a serialized model. The jury is still out on whether this is sane or not. Of course I'm not the first one to have done this, for instance see [sklearn-porter](https://github.com/nok/sklearn-porter) and [pure-predict](https://github.com/Ibotta/pure-predict). Note if you don't mind installing depencencies on your inference machine, then tools such as [scikit-learn-intelex](https://github.com/intel/scikit-learn-intelex) might do the job for you. It's also worth mentioning [xgb2sql](https://github.com/Chryzanthemum/xgb2sql), which converts an XGBoost model to a SQL query.
 
 Note that you can use `naked` via this [web interface](https://naked-app.herokuapp.com/).
 
